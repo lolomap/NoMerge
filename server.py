@@ -2,11 +2,16 @@ import random
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 import threading
+import sys
+import pickle
+import os
 
 from nicegui import ui
 
-hostname = 'localhost'
-port = 8085
+hostname = sys.argv[1] if len(sys.argv) > 1 else 'localhost'
+port = sys.argv[2] if len(sys.argv) > 2 else 8085
+db_path = 'db.pkl'
+
 data = {}
 
 
@@ -21,7 +26,7 @@ def ui_list() -> None:
 				files[_file].append(_user)
 
 	with ui.list().props('bordered separator'):
-		ui.item_label('Уже редактирующиеся файлы (опасно для мерджа)').props('header').classes('text-bold')
+		ui.item_label('Busy files (unsafe for simultaneous editing)').props('header').classes('text-bold')
 		ui.separator()
 		for file, users in list(files.items()):
 			with ui.item():
@@ -31,6 +36,19 @@ def ui_list() -> None:
 						ui.item_label(file)
 						for user in users:
 							ui.item_label(user)
+
+
+def save_data(user, files):
+	data[user] = files
+	with open(db_path, 'wb') as f:
+		pickle.dump(data, f)
+
+
+def load_data():
+	global data
+	if os.path.isfile(db_path):
+		with open(db_path, 'rb') as f:
+			data = pickle.load(f)
 
 
 class WebServer(BaseHTTPRequestHandler):
@@ -45,7 +63,7 @@ class WebServer(BaseHTTPRequestHandler):
 			post_data = json.loads(raw)
 			# print(post_data)
 
-			data[post_data['user']] = post_data['files']
+			save_data(post_data['user'], post_data['files'])
 			ui_list.refresh()
 
 			print(data)
@@ -66,6 +84,11 @@ def start_server():
 	web_server.server_close()
 	print('Server stopped')
 
+
+# EXECUTION #
+
+
+load_data()
 
 daemon = threading.Thread(
 	name='daemon_server',

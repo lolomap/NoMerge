@@ -1,5 +1,6 @@
 import platform
 import sys
+import os
 import time
 import logging
 import re
@@ -8,9 +9,10 @@ import requests
 from watchdog.observers import Observer
 from watchdog.events import LoggingEventHandler, FileSystemEventHandler, FileSystemEvent
 
-url = 'http://localhost:8085'
-path = '.\\test'
-track_files = '.*.txt'
+
+path = sys.argv[1] if len(sys.argv) > 1 else '.\\test'
+url = sys.argv[2] if len(sys.argv) > 2 else 'http://localhost:8085'
+track_files = sys.argv[3] if len(sys.argv) > 3 else '.*.txt'
 
 username = platform.node()
 data = set()
@@ -37,12 +39,17 @@ class FileChangesEventHandler(FileSystemEventHandler):
 			data.add(event.src_path)
 			logging.info(data)
 			try:
-				requests.post('http://localhost:8085', json={'user': username, 'files': list(data)})
+				requests.post(url, json={'user': username, 'files': list(data)})
 			except Exception as e:
 				print(e)
 
 
 if __name__ == "__main__":
+
+	if not os.path.isdir(path):
+		print(f'Path {path} is not a dir')
+		exit()
+
 	gitrun = subprocess.run(['git', 'config', 'user.name'], stdout=subprocess.PIPE)
 	username = gitrun.stdout.decode(encoding='utf-8')[:-1]
 
@@ -52,7 +59,6 @@ if __name__ == "__main__":
 		datefmt='%Y-%m-%d %H:%M:%S'
 	)
 
-	path = sys.argv[1] if len(sys.argv) > 1 else path
 	logging.info(f'start watching directory {path!r}')
 	event_handler = FileChangesEventHandler()
 	observer = Observer()
