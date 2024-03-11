@@ -50,14 +50,16 @@ class FileChangesEventHandler(FileSystemEventHandler):
 if __name__ == "__main__":
 
 	config = configparser.ConfigParser()
-	config.read('.config')
+	config.read('.config', encoding='utf-8')
 	path = config['DEFAULT']['Path']
 	url = config['DEFAULT']['Url']
 	track_files = config['DEFAULT']['TrackFiles']
 
 	if not os.path.isdir(path):
 		print(f'Path {path} is not a dir')
-		exit(1)
+		# For Windows service to see if app was started
+		subprocess.run(['git', 'config', 'user.name'], stdout=subprocess.PIPE)
+		sys.exit(1)
 
 	gitrun = subprocess.run(['git', 'config', 'user.name'], stdout=subprocess.PIPE, shell=True)
 	username = gitrun.stdout.decode(encoding='utf-8')[:-1]
