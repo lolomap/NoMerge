@@ -26,7 +26,7 @@ class FileChangesEventHandler(FileSystemEventHandler):
 		if re.match(track_files, event.src_path):
 
 			# If changes make file to up-to-day, remove it from user editings
-			_gitrun = subprocess.run(['git', 'status', path, '-s'], stdout=subprocess.PIPE)
+			_gitrun = subprocess.run(['git', 'status', path, '-s'], stdout=subprocess.PIPE, shell=True)
 			_output = _gitrun.stdout.decode(encoding='utf-8')
 			if event.src_path.split('\\')[-1] not in _output:
 				if event.src_path in data:
@@ -59,7 +59,7 @@ if __name__ == "__main__":
 		print(f'Path {path} is not a dir')
 		exit(1)
 
-	gitrun = subprocess.run(['git', 'config', 'user.name'], stdout=subprocess.PIPE)
+	gitrun = subprocess.run(['git', 'config', 'user.name'], stdout=subprocess.PIPE, shell=True)
 	username = gitrun.stdout.decode(encoding='utf-8')[:-1]
 
 	logging.basicConfig(
