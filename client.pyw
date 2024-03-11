@@ -1,6 +1,7 @@
 import platform
 import sys
 import os
+import threading
 import time
 import logging
 import re
@@ -8,11 +9,13 @@ import subprocess
 import requests
 from watchdog.observers import Observer
 from watchdog.events import LoggingEventHandler, FileSystemEventHandler, FileSystemEvent
+import configparser
 
+import tray
 
-path = sys.argv[1] if len(sys.argv) > 1 else '.\\test'
-url = sys.argv[2] if len(sys.argv) > 2 else 'http://localhost:8085'
-track_files = sys.argv[3] if len(sys.argv) > 3 else '.*.txt'
+path = ''
+url = ''
+track_files = ''
 
 username = platform.node()
 data = set()
@@ -46,9 +49,15 @@ class FileChangesEventHandler(FileSystemEventHandler):
 
 if __name__ == "__main__":
 
+	config = configparser.ConfigParser()
+	config.read('.config')
+	path = config['DEFAULT']['Path']
+	url = config['DEFAULT']['Url']
+	track_files = config['DEFAULT']['TrackFiles']
+
 	if not os.path.isdir(path):
 		print(f'Path {path} is not a dir')
-		exit()
+		exit(1)
 
 	gitrun = subprocess.run(['git', 'config', 'user.name'], stdout=subprocess.PIPE)
 	username = gitrun.stdout.decode(encoding='utf-8')[:-1]
@@ -58,6 +67,13 @@ if __name__ == "__main__":
 		format='%(asctime)s - %(message)s',
 		datefmt='%Y-%m-%d %H:%M:%S'
 	)
+
+	daemon = threading.Thread(
+		name='daemon_tray_icon',
+		target=tray.tray_create
+	)
+	daemon.daemon = True
+	daemon.start()
 
 	logging.info(f'start watching directory {path!r}')
 	event_handler = FileChangesEventHandler()
