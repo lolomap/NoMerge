@@ -36,6 +36,6 @@ def send_file_state(src_path: str, username: str) -> None:
 
 def send_user_data(username: str, user_data: set) -> None:
 	try:
-		requests.post(config.url, json={'user': username, 'files': list(data)})
+		requests.post(config.url, json={'user': username, 'files': list(user_data)})
 	except Exception as e:
 		print(e)

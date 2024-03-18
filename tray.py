@@ -13,12 +13,12 @@ def close_client():
 def force_check():
 	files_list = [f for f in os.listdir(config.path) if os.path.isfile(os.path.join(config.path, f))]
 	for file in files_list:
-		print(file)
-		utils.send_file_state(config.path + file, config.username)
+		print(config.path + '\\' + file)
+		utils.send_file_state(config.path + '\\' + file, config.username)
 
 
 def force_clear():
-	utils.data = set()
+	utils.data.clear()
 	utils.send_user_data(config.username, utils.data)
 
 
@@ -30,7 +30,7 @@ def tray_create():
 		icon=image,
 		menu=Menu(
 			MenuItem('Force Check', force_check),
-			MenuItem('Force Clear', force_clear()),
+			MenuItem('Force Clear', force_clear),
 			MenuItem('Exit', close_client)
 		)
 	)
