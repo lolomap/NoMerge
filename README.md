@@ -1,18 +1,21 @@
+# What is it
+
+This utility tracks changes in your local repository that isn't pushed to remote repository yet. Server side of utility shows a list of such files with users who change files. It uses **NiceGUI** for web interface on server and **pystray** with **cx_Freeze** on client.
 
 # Install
 
 ## Client
 
-1. For Windows you can download binaries from Release page or build it yourself.
+1. For Windows you can download binaries from Release page or build it yourself. Install client folder inside repository! Otherwise app couldn't call git commands for up-to-date checking.
 
-2. Edit `.config` to set tracking path, files filter and server address. `TrackFiles` field uses python RegEx for files filtering.
+2. Edit `.config` to set tracking path, files filter and server address. `TrackFiles` field uses python RegEx for files filtering. Set `Url` field to API address of server-side.
 
 3. Launch `clent.exe` to start tracking. You can add it to autostart.
 
 ### Build Client from sources
 
-1. Install dependencies
-2. Run `python setup.py build`
+1. Install pip dependencies.
+2. Run `python setup.py build`.
 
 ##  Server
 
@@ -59,7 +62,7 @@ server {
     }
 }
 server {
-    listen PUBLIC_API_PORT;
+    listen PUBLIC_GUI_PORT;
     location / {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
