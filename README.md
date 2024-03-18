@@ -7,7 +7,7 @@
 
 2. Edit `.config` to set tracking path, files filter and server address. `TrackFiles` field uses python RegEx for files filtering.
 
-3. Launch `clent.exe` to start tracking. You can add it to autoloads.
+3. Launch `clent.exe` to start tracking. You can add it to autostart.
 
 ### Build Client from sources
 
